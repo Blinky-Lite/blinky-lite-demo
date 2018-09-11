@@ -2,7 +2,21 @@
     {
         "id": "465cfd27.107674",
         "type": "tab",
-        "label": "Tutorial DMA",
+        "label": "tutorial-dma",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "c43c3f4a.7aaaa",
+        "type": "tab",
+        "label": "gg-scale-dma",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2e881513.b5db6a",
+        "type": "tab",
+        "label": "geiger-dma",
         "disabled": false,
         "info": ""
     },
@@ -121,6 +135,65 @@
         "type": "arduino-board",
         "z": "",
         "device": "/dev/ttyACM0"
+    },
+    {
+        "id": "db9f4882.52c9f8",
+        "type": "mqtt-broker",
+        "z": "",
+        "name": "Shiftr",
+        "broker": "broker.shiftr.io",
+        "port": "1883",
+        "clientid": "gg-scale-01-dma",
+        "usetls": false,
+        "compatmode": true,
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "e166c63b.f066a8",
+        "type": "serial-port",
+        "z": "c43c3f4a.7aaaa",
+        "serialport": "/dev/ttyUSB0",
+        "serialbaud": "600",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": true,
+        "responsetimeout": ""
+    },
+    {
+        "id": "6ca1b8a9.c3e618",
+        "type": "serial-port",
+        "z": "",
+        "serialport": "/dev/ttyACM1",
+        "serialbaud": "9600",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": true,
+        "responsetimeout": ""
+    },
+    {
+        "id": "d19247ac.b91cc8",
+        "type": "ui_tab",
+        "z": "",
+        "name": "Geiger",
+        "icon": "dashboard",
+        "order": 2
     },
     {
         "id": "262b6cae.fe0b94",
@@ -585,5 +658,325 @@
                 "f4a9bd6c.67dcc"
             ]
         ]
+    },
+    {
+        "id": "2c5ffced.556a84",
+        "type": "inject",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Rep",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": ".05",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "x": 250,
+        "y": 220,
+        "wires": [
+            [
+                "7c770730.f335b8"
+            ]
+        ]
+    },
+    {
+        "id": "734e1059.e1b8f",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Get Weight",
+        "func": "var buffer = new Buffer([0x1b, 0x70]);\nreturn {'topic':'print','payload':buffer};\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 610,
+        "y": 220,
+        "wires": [
+            [
+                "425d8acd.0d73d4"
+            ]
+        ]
+    },
+    {
+        "id": "34aa89f2.6d01b6",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Read Weight",
+        "func": "var dataString = msg.payload;\nvar sign = +1;\nif (dataString.substring(0,1) == '-') sign = -1;\nvar weight = sign * Number(dataString.substring(2,9));\nvar unit = dataString.substring(9,12).trim();\nvar validData = true;\nvar timeStamp = new Date().getTime();\nif (unit.length < 1) validData = false;\nvar newMsg = {'topic':'weight','payload':{'value':weight,'unit':unit, 'validData':validData, 'timestamp':timeStamp}};\nflow.set('scaleReady',true);\nreturn newMsg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 120,
+        "wires": [
+            [
+                "f8ddad93.65245"
+            ]
+        ]
+    },
+    {
+        "id": "1c7ab4cd.47185b",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Toggle Count",
+        "func": "var buffer = new Buffer([0x1b, 0x72]);\nreturn {'topic':'print','payload':buffer};\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 530,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "cd272bb9.d93f98",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Toggle Units",
+        "func": "var buffer = new Buffer([0x1b, 0x73]);\nreturn {'topic':'print','payload':buffer};\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 530,
+        "y": 400,
+        "wires": [
+            [
+                "425d8acd.0d73d4"
+            ]
+        ]
+    },
+    {
+        "id": "1e24cccc.dbb6f3",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Tare",
+        "func": "var buffer = new Buffer([0x1b, 0x74]);\nreturn {'topic':'print','payload':buffer};\n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 550,
+        "y": 520,
+        "wires": [
+            [
+                "425d8acd.0d73d4"
+            ]
+        ]
+    },
+    {
+        "id": "f8ddad93.65245",
+        "type": "mqtt out",
+        "z": "c43c3f4a.7aaaa",
+        "name": "",
+        "topic": "gg-scale/01/weight",
+        "qos": "0",
+        "retain": "false",
+        "broker": "db9f4882.52c9f8",
+        "x": 710,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "f08e17d9.c01088",
+        "type": "mqtt in",
+        "z": "c43c3f4a.7aaaa",
+        "name": "",
+        "topic": "gg-scale/01/tare",
+        "qos": "0",
+        "broker": "db9f4882.52c9f8",
+        "x": 260,
+        "y": 520,
+        "wires": [
+            [
+                "1e24cccc.dbb6f3"
+            ]
+        ]
+    },
+    {
+        "id": "da0ae035.daf85",
+        "type": "mqtt in",
+        "z": "c43c3f4a.7aaaa",
+        "name": "",
+        "topic": "gg-scale/01/toggleUnits",
+        "qos": "0",
+        "broker": "db9f4882.52c9f8",
+        "x": 290,
+        "y": 400,
+        "wires": [
+            [
+                "cd272bb9.d93f98"
+            ]
+        ]
+    },
+    {
+        "id": "561580dc.b897e",
+        "type": "mqtt in",
+        "z": "c43c3f4a.7aaaa",
+        "name": "",
+        "topic": "gg-scale/01/toggleCount",
+        "qos": "0",
+        "broker": "db9f4882.52c9f8",
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "1c7ab4cd.47185b"
+            ]
+        ]
+    },
+    {
+        "id": "9697bf2a.66158",
+        "type": "inject",
+        "z": "c43c3f4a.7aaaa",
+        "name": "toggleCount",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 270,
+        "y": 340,
+        "wires": [
+            [
+                "1c7ab4cd.47185b"
+            ]
+        ]
+    },
+    {
+        "id": "942906b3.059488",
+        "type": "inject",
+        "z": "c43c3f4a.7aaaa",
+        "name": "toggleUnits",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 270,
+        "y": 460,
+        "wires": [
+            [
+                "cd272bb9.d93f98"
+            ]
+        ]
+    },
+    {
+        "id": "8b1f4321.c240c",
+        "type": "inject",
+        "z": "c43c3f4a.7aaaa",
+        "name": "tare",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 250,
+        "y": 580,
+        "wires": [
+            [
+                "1e24cccc.dbb6f3"
+            ]
+        ]
+    },
+    {
+        "id": "5107ec8b.1a1a64",
+        "type": "inject",
+        "z": "c43c3f4a.7aaaa",
+        "name": "init",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "x": 250,
+        "y": 640,
+        "wires": [
+            [
+                "7a19aa55.53c154"
+            ]
+        ]
+    },
+    {
+        "id": "7a19aa55.53c154",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Init scaleReady",
+        "func": "flow.set('scaleReady',true);\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 420,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7c770730.f335b8",
+        "type": "function",
+        "z": "c43c3f4a.7aaaa",
+        "name": "Check scale ready",
+        "func": "if (!flow.get('scaleReady')) return null;\nflow.set('scaleReady',false);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 420,
+        "y": 220,
+        "wires": [
+            [
+                "734e1059.e1b8f"
+            ]
+        ]
+    },
+    {
+        "id": "e3379b00.eb9b48",
+        "type": "serial in",
+        "z": "c43c3f4a.7aaaa",
+        "name": "gg-scale-01",
+        "serial": "e166c63b.f066a8",
+        "x": 250,
+        "y": 120,
+        "wires": [
+            [
+                "34aa89f2.6d01b6"
+            ]
+        ]
+    },
+    {
+        "id": "425d8acd.0d73d4",
+        "type": "serial out",
+        "z": "c43c3f4a.7aaaa",
+        "name": "gg-scale-01",
+        "serial": "e166c63b.f066a8",
+        "x": 800,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d9840907.7665f8",
+        "type": "serial in",
+        "z": "2e881513.b5db6a",
+        "name": "GeigerRead",
+        "serial": "6ca1b8a9.c3e618",
+        "x": 159,
+        "y": 160.5,
+        "wires": [
+            [
+                "42e13dbe.e65ea4"
+            ]
+        ]
+    },
+    {
+        "id": "42e13dbe.e65ea4",
+        "type": "mqtt out",
+        "z": "2e881513.b5db6a",
+        "name": "",
+        "topic": "geiger01",
+        "qos": "0",
+        "retain": "false",
+        "broker": "db9f4882.52c9f8",
+        "x": 400,
+        "y": 160,
+        "wires": []
     }
 ]
