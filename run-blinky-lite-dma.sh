@@ -1,5 +1,5 @@
 #!/bin/bash
-sleep 5
+sleep 60
 cd /home/pi/blinky-lite/blinky-lite-dma
 source runNodeRed.sh
 
