@@ -188,14 +188,6 @@
         "responsetimeout": ""
     },
     {
-        "id": "d19247ac.b91cc8",
-        "type": "ui_tab",
-        "z": "",
-        "name": "Geiger",
-        "icon": "dashboard",
-        "order": 2
-    },
-    {
         "id": "262b6cae.fe0b94",
         "type": "mqtt out",
         "z": "465cfd27.107674",
@@ -233,7 +225,7 @@
         "qos": "0",
         "broker": "ddd272b6.33c42",
         "x": 140,
-        "y": 240,
+        "y": 260,
         "wires": [
             [
                 "25ee484a.aa07a8"
@@ -249,7 +241,7 @@
         "action": "",
         "pretty": false,
         "x": 370,
-        "y": 240,
+        "y": 260,
         "wires": [
             [
                 "174ff73a.4e0499"
@@ -261,14 +253,15 @@
         "type": "function",
         "z": "465cfd27.107674",
         "name": "Parse MQTT",
-        "func": "var topic = '';\nif (msg.topic == 'tutorial/web-app/red/ledState') topic = 'red/ledState';\nif (msg.topic == 'tutorial/web-app/red/ledToggle') topic = 'red/ledToggle';\nreturn {'topic':topic, 'payload':msg.payload};",
+        "func": "var topic = '';\nif (msg.topic == 'tutorial/web-app/red/ledState') topic = 'red/ledState';\nif (msg.topic == 'tutorial/web-app/red/ledToggle') topic = 'red/ledToggle';\nif (msg.topic == 'tutorial/web-app/red/status') topic = 'red/status';\nreturn {'topic':topic, 'payload':msg.payload};",
         "outputs": 1,
         "noerr": 0,
         "x": 510,
-        "y": 240,
+        "y": 260,
         "wires": [
             [
-                "ae0ea12a.6f83d"
+                "ae0ea12a.6f83d",
+                "cf576f53.9b6cc"
             ]
         ]
     },
@@ -369,7 +362,7 @@
         "once": true,
         "onceDelay": 0.1,
         "x": 520,
-        "y": 280,
+        "y": 220,
         "wires": [
             [
                 "ae0ea12a.6f83d"
@@ -381,7 +374,7 @@
         "type": "function",
         "z": "465cfd27.107674",
         "name": "LED Controller",
-        "func": "if (msg.topic != 'blinker') flow.set(msg.topic, msg.payload);\nvar ledValue = context.get('ledValue');\nif (ledValue == undefined) ledValue = -1;\nvar ledIntensity = flow.get('red/ledIntensity');\nif (ledIntensity == undefined) ledIntensity = 90;\nvar ledState = flow.get('red/ledState');\nif (ledState == undefined) ledState = 1;\nvar ledToggle = flow.get('red/ledToggle');\nif (ledToggle == undefined) ledToggle = 250;\nif (msg.topic != 'blinker')\n{\n    if (ledState == 0)\n    {\n        ledValue = 0;\n    }\n    if (ledState == 2) \n    {\n        ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n    }\n}\nelse\n{\n    ledValue = -1;\n    var counter = context.get('counter');\n    if (counter == undefined) counter = 0;\n    if (ledState == 1)\n    {\n        if (counter == 0)\n        {\n            ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n        }\n        if (counter == ledToggle)\n        {\n            ledValue = 0;\n        }\n    }\n    counter  = counter + 1;\n    if (counter > (ledToggle * 2)) counter = 0;\n    context.set('counter',counter);\n    \n    msg = null;\n}\nvar ledMsg = {'topic':'ledValue', 'payload':ledValue};\nif (ledValue < 0) ledMsg =  null;\nreturn [ledMsg, msg];",
+        "func": "if (msg.topic == 'red/status') return [null,null];\nif (msg.topic != 'blinker') flow.set(msg.topic, msg.payload);\nvar ledValue = context.get('ledValue');\nif (ledValue == undefined) ledValue = -1;\nvar ledIntensity = flow.get('red/ledIntensity');\nif (ledIntensity == undefined) ledIntensity = 90;\nvar ledState = flow.get('red/ledState');\nif (ledState == undefined) ledState = 1;\nvar ledToggle = flow.get('red/ledToggle');\nif (ledToggle == undefined) ledToggle = 250;\nif (msg.topic != 'blinker')\n{\n    if (ledState == 0)\n    {\n        ledValue = 0;\n    }\n    if (ledState == 2) \n    {\n        ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n    }\n}\nelse\n{\n    ledValue = -1;\n    var counter = context.get('counter');\n    if (counter == undefined) counter = 0;\n    if (ledState == 1)\n    {\n        if (counter == 0)\n        {\n            ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n        }\n        if (counter == ledToggle)\n        {\n            ledValue = 0;\n        }\n    }\n    counter  = counter + 1;\n    if (counter > (ledToggle * 2)) counter = 0;\n    context.set('counter',counter);\n    \n    msg = null;\n}\nvar ledMsg = {'topic':'ledValue', 'payload':ledValue};\nif (ledValue < 0) ledMsg =  null;\nreturn [ledMsg, msg];",
         "outputs": 2,
         "noerr": 0,
         "x": 780,
@@ -413,13 +406,13 @@
         "z": "465cfd27.107674",
         "name": "",
         "topic": "red/ledToggle",
-        "payload": "25",
+        "payload": "2",
         "payloadType": "num",
         "repeat": "",
         "crontab": "",
         "once": true,
         "onceDelay": "2",
-        "x": 490,
+        "x": 500,
         "y": 40,
         "wires": [
             [
@@ -436,7 +429,7 @@
         "outputs": 1,
         "noerr": 0,
         "x": 1000,
-        "y": 540,
+        "y": 680,
         "wires": [
             [
                 "3bf58a9c.eb74a6"
@@ -453,7 +446,7 @@
         "retain": "true",
         "broker": "ddd272b6.33c42",
         "x": 1170,
-        "y": 540,
+        "y": 680,
         "wires": []
     },
     {
@@ -464,8 +457,8 @@
         "topic": "tutorial/web-app/green/#",
         "qos": "0",
         "broker": "ddd272b6.33c42",
-        "x": 130,
-        "y": 580,
+        "x": 150,
+        "y": 740,
         "wires": [
             [
                 "e16ebd3.0855d4"
@@ -481,7 +474,7 @@
         "action": "",
         "pretty": false,
         "x": 370,
-        "y": 580,
+        "y": 740,
         "wires": [
             [
                 "87b5a93.5351858"
@@ -493,14 +486,15 @@
         "type": "function",
         "z": "465cfd27.107674",
         "name": "Parse MQTT",
-        "func": "var topic = '';\nif (msg.topic == 'tutorial/web-app/green/ledState') topic = 'green/ledState';\nif (msg.topic == 'tutorial/web-app/green/ledToggle') topic = 'green/ledToggle';\nreturn {'topic':topic, 'payload':msg.payload};",
+        "func": "var topic = '';\nif (msg.topic == 'tutorial/web-app/green/ledState') topic = 'green/ledState';\nif (msg.topic == 'tutorial/web-app/green/ledToggle') topic = 'green/ledToggle';\nif (msg.topic == 'tutorial/web-app/green/status') topic = 'green/status';\nreturn {'topic':topic, 'payload':msg.payload};",
         "outputs": 1,
         "noerr": 0,
         "x": 510,
-        "y": 580,
+        "y": 740,
         "wires": [
             [
-                "f4a9bd6c.67dcc"
+                "f4a9bd6c.67dcc",
+                "709c3348.c296dc"
             ]
         ]
     },
@@ -513,7 +507,7 @@
         "outputs": 1,
         "noerr": 0,
         "x": 490,
-        "y": 460,
+        "y": 600,
         "wires": [
             [
                 "f4a9bd6c.67dcc"
@@ -529,7 +523,7 @@
         "state": "INPUT",
         "arduino": "a617aefc.4918d",
         "x": 90,
-        "y": 460,
+        "y": 600,
         "wires": [
             [
                 "bab43b74.0562d8"
@@ -549,7 +543,7 @@
         "once": true,
         "onceDelay": "3",
         "x": 490,
-        "y": 420,
+        "y": 560,
         "wires": [
             [
                 "f4a9bd6c.67dcc"
@@ -565,7 +559,7 @@
         "state": "ANALOG",
         "arduino": "a617aefc.4918d",
         "x": 90,
-        "y": 520,
+        "y": 660,
         "wires": [
             [
                 "4e8f7c96.0081d4"
@@ -581,7 +575,7 @@
         "outputs": 1,
         "noerr": 0,
         "x": 510,
-        "y": 520,
+        "y": 660,
         "wires": [
             [
                 "f4a9bd6c.67dcc"
@@ -601,7 +595,7 @@
         "once": true,
         "onceDelay": 0.1,
         "x": 520,
-        "y": 620,
+        "y": 700,
         "wires": [
             [
                 "f4a9bd6c.67dcc"
@@ -613,11 +607,11 @@
         "type": "function",
         "z": "465cfd27.107674",
         "name": "LED Controller",
-        "func": "if (msg.topic != 'blinker') flow.set(msg.topic, msg.payload);\nvar ledValue = context.get('ledValue');\nif (ledValue == undefined) ledValue = -1;\nvar ledIntensity = flow.get('green/ledIntensity');\nif (ledIntensity == undefined) ledIntensity = 90;\nvar ledState = flow.get('green/ledState');\nif (ledState == undefined) ledState = 1;\nvar ledToggle = flow.get('green/ledToggle');\nif (ledToggle == undefined) ledToggle = 250;\nif (msg.topic != 'blinker')\n{\n    if (ledState == 0)\n    {\n        ledValue = 0;\n    }\n    if (ledState == 2) \n    {\n        ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n    }\n}\nelse\n{\n    ledValue = -1;\n    var counter = context.get('counter');\n    if (counter == undefined) counter = 0;\n    if (ledState == 1)\n    {\n        if (counter == 0)\n        {\n            ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n        }\n        if (counter == ledToggle)\n        {\n            ledValue = 0;\n        }\n    }\n    counter  = counter + 1;\n    if (counter > (ledToggle * 2)) counter = 0;\n    context.set('counter',counter);\n    \n    msg = null;\n}\nvar ledMsg = {'topic':'ledValue', 'payload':ledValue};\nif (ledValue < 0) ledMsg =  null;\nreturn [ledMsg, msg];",
+        "func": "if (msg.topic == 'green/status') return [null,null];\nif (msg.topic != 'blinker') flow.set(msg.topic, msg.payload);\nvar ledValue = context.get('ledValue');\nif (ledValue == undefined) ledValue = -1;\nvar ledIntensity = flow.get('green/ledIntensity');\nif (ledIntensity == undefined) ledIntensity = 90;\nvar ledState = flow.get('green/ledState');\nif (ledState == undefined) ledState = 1;\nvar ledToggle = flow.get('green/ledToggle');\nif (ledToggle == undefined) ledToggle = 250;\nif (msg.topic != 'blinker')\n{\n    if (ledState == 0)\n    {\n        ledValue = 0;\n    }\n    if (ledState == 2) \n    {\n        ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n    }\n}\nelse\n{\n    ledValue = -1;\n    var counter = context.get('counter');\n    if (counter == undefined) counter = 0;\n    if (ledState == 1)\n    {\n        if (counter == 0)\n        {\n            ledValue = Math.round(ledIntensity * 255.0 / 100.0);\n        }\n        if (counter == ledToggle)\n        {\n            ledValue = 0;\n        }\n    }\n    counter  = counter + 1;\n    if (counter > (ledToggle * 2)) counter = 0;\n    context.set('counter',counter);\n    \n    msg = null;\n}\nvar ledMsg = {'topic':'ledValue', 'payload':ledValue};\nif (ledValue < 0) ledMsg =  null;\nreturn [ledMsg, msg];",
         "outputs": 2,
         "noerr": 0,
         "x": 780,
-        "y": 520,
+        "y": 660,
         "wires": [
             [
                 "2a11df35.783d9"
@@ -636,7 +630,7 @@
         "state": "PWM",
         "arduino": "a617aefc.4918d",
         "x": 970,
-        "y": 480,
+        "y": 620,
         "wires": []
     },
     {
@@ -645,14 +639,14 @@
         "z": "465cfd27.107674",
         "name": "",
         "topic": "green/ledToggle",
-        "payload": "25",
+        "payload": "7",
         "payloadType": "num",
         "repeat": "",
         "crontab": "",
         "once": true,
         "onceDelay": "2",
-        "x": 480,
-        "y": 380,
+        "x": 490,
+        "y": 520,
         "wires": [
             [
                 "f4a9bd6c.67dcc"
@@ -978,5 +972,187 @@
         "x": 400,
         "y": 160,
         "wires": []
+    },
+    {
+        "id": "cf576f53.9b6cc",
+        "type": "function",
+        "z": "465cfd27.107674",
+        "name": "Red Status",
+        "func": "if (msg.topic != 'red/status') return [null,null,null];\nreturn [\n    {\n        'topic':'red/ledState',\n        'payload':flow.get('red/ledState')\n    },\n    {\n        'topic':'red/ledIntensity',\n        'payload':flow.get('red/ledIntensity')\n    },\n    {\n        'topic':'red/ledToggle',\n        'payload':flow.get('red/ledToggle')\n    }\n];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 570,
+        "y": 380,
+        "wires": [
+            [
+                "4b62c2ad.82faec"
+            ],
+            [
+                "51487f77.191c"
+            ],
+            [
+                "f74629ae.f98068"
+            ]
+        ]
+    },
+    {
+        "id": "4b62c2ad.82faec",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 790,
+        "y": 340,
+        "wires": [
+            [
+                "87b969ce.fb53b8"
+            ]
+        ]
+    },
+    {
+        "id": "51487f77.191c",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 800,
+        "y": 380,
+        "wires": [
+            [
+                "87b969ce.fb53b8"
+            ]
+        ]
+    },
+    {
+        "id": "f74629ae.f98068",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 790,
+        "y": 420,
+        "wires": [
+            [
+                "87b969ce.fb53b8"
+            ]
+        ]
+    },
+    {
+        "id": "709c3348.c296dc",
+        "type": "function",
+        "z": "465cfd27.107674",
+        "name": "Green Status",
+        "func": "if (msg.topic != 'green/status') return [null,null,null];\nreturn [\n    {\n        'topic':'green/ledState',\n        'payload':flow.get('green/ledState')\n    },\n    {\n        'topic':'green/ledIntensity',\n        'payload':flow.get('green/ledIntensity')\n    },\n    {\n        'topic':'green/ledToggle',\n        'payload':flow.get('green/ledToggle')\n    }\n];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 570,
+        "y": 840,
+        "wires": [
+            [
+                "89a82996.a05d38"
+            ],
+            [
+                "1ab9fff8.ca259"
+            ],
+            [
+                "a223841c.c5cb18"
+            ]
+        ]
+    },
+    {
+        "id": "89a82996.a05d38",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "0.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 790,
+        "y": 800,
+        "wires": [
+            [
+                "b30a5728.842888"
+            ]
+        ]
+    },
+    {
+        "id": "1ab9fff8.ca259",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 800,
+        "y": 840,
+        "wires": [
+            [
+                "b30a5728.842888"
+            ]
+        ]
+    },
+    {
+        "id": "a223841c.c5cb18",
+        "type": "delay",
+        "z": "465cfd27.107674",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1.5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 790,
+        "y": 880,
+        "wires": [
+            [
+                "b30a5728.842888"
+            ]
+        ]
     }
 ]
